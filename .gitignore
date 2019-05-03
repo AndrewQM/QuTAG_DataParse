@@ -1,0 +1,27 @@
+
+
+
+# Data Files
+
+data.txt
+data_test2.txt
+
+
+
+# Test code files
+basic_checkbutton.py
+basic_dropdown.py
+dataman.py
+dataparse.py
+dataparse_2.py
+dataparse_3.py
+grabfile.py
+params_parser.py
+
+FQNETDAQ.old.c
+FQNETDAQ.old2.c
+FQNETDAQ_bad.c
+FQNETDAQ_bad41819.c
+
+
+

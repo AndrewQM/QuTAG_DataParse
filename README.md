@@ -6,7 +6,4 @@
 
 Run QuTAG_Dataparse with teh following command
 
-'''
-$python QuTAG_Dataparse.py "datafile" g
-
-'''
+'$python QuTAG_Dataparse.py "datafile" g'

@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter.ttk import *
 from matplotlib import pyplot as plt
 import sys
 from ParamsParse import *
@@ -236,20 +237,81 @@ if len(sys.argv) > 2:
 
         ops = Operations(1, 1, 0, 0)
 
+        x = 2
+        y = x + 1
+        z = y + 1
+        a = z + 3
+
+
+        OPTIONS = ['    ', "AND", " OR "]
+
+        timeinfo = [str(int(totalt/1000000000)), 'ms']
+        sep = ' '
+        timelabel = Label(root, text='total time of file:').grid(row = 0, column = 0)
+        timelabelval = Label(root, text=sep.join(timeinfo)).grid(row = 0, column = 1)
+
+        space3 = Label(root, text=" ").grid(row = 1, column = 0)
+
+        root.title('QuTAG DataParse')
+        Mask1Label = Label(root, text="Mask1:   ").grid(row = x, column = 0)
+        Mask1ChA = Label(root, text="    Channel A:").grid(row = x, column = 1)
+        Mask1ChAVal = Entry(root).grid(row = x, column = 2)
+        Mask1offset = Label(root, text="    Offset (ps):").grid(row = x, column = 3)
+        Mask1offsetVal = Entry(root).grid(row = x, column = 4)
+        Mask1ChB = Label(root, text="    Channel B:").grid(row = x, column = 5)
+        Mask1ChBVal = Entry(root).grid(row = x, column = 6)
+        Mask1Window = Label(root, text="    Window (ps)").grid(row = x, column = 7)
+        Mask1WindowVal = Entry(root).grid(row = x, column = 8)
+        OP12Label = Label(root, text="      1-2 OP:").grid(row = x, column = 9)
+        OP12Val = StringVar(root)
+        OP12Val.set(OPTIONS[0]) # default value
+        OP12 = OptionMenu(root, OP12Val, *OPTIONS).grid(row = x, column = 10)
+
+
+        Mask2Label = Label(root, text="Mask2:   ").grid(row = y, column = 0)
+        Mask2ChA = Label(root, text="    Channel A:").grid(row = y, column = 1)
+        Mask2ChAVal = Entry(root).grid(row = y, column = 2)
+        Mask2offset = Label(root, text="    Offset (ps):").grid(row = y, column = 3)
+        Mask2offsetVal = Entry(root).grid(row = y, column = 4)
+        Mask2ChB = Label(root, text="    Channel B:").grid(row = y, column = 5)
+        Mask2ChBVal = Entry(root).grid(row = y, column = 6)
+        Mask2Window = Label(root, text="    Window (ps)").grid(row = y, column = 7)
+        Mask2WindowVal = Entry(root).grid(row = y, column = 8)
+        OP12Label = Label(root, text="      2-3 OP:").grid(row = y, column = 9)
+        OP23Val = StringVar(root)
+        OP23Val.set(OPTIONS[0]) # default value
+        OP23 = OptionMenu(root, OP23Val, *OPTIONS).grid(row = y, column = 10)
+
+        Mask3Label = Label(root, text="Mask2:   ").grid(row = z, column = 0)
+        Mask3ChA = Label(root, text="    Channel A:").grid(row = z, column = 1)
+        Mask3ChAVal = Entry(root).grid(row = z, column = 2)
+        Mask3offset = Label(root, text="    Offset (ps):").grid(row = z, column = 3)
+        Mask3offsetVal = Entry(root).grid(row = z, column = 4)
+        Mask3ChB = Label(root, text="    Channel B:").grid(row = z, column = 5)
+        Mask3ChBVal = Entry(root).grid(row = z, column = 6)
+        Mask3Window = Label(root, text="    Window (ps)").grid(row = z, column = 7)
+        Mask3WindowVal = Entry(root).grid(row = z, column = 8)
+
+
+
+
+        space = Label(root, text=" ").grid(row = z + 1, column = 0)
+        space2 = Label(root, text=" ").grid(row = z + 2, column = 1)
+
 
         check1 = Checkbutton(text="by time", variable = checkstat1, command=click1)
-        check1.grid(row = 0, column = 0)
+        check1.grid(row = a, column = 0)
 
         check2 = Checkbutton(text="by files", variable = checkstat2, command=click2)
-        check2.grid(row = 0, column = 1)
+        check2.grid(row = a, column = 1)
 
         timewindowlabel = Label(root, text="    Integration Bins")
-        timewindowlabel.grid(row = 0, column = 2)
+        timewindowlabel.grid(row = a, column = 7)
         timewindow = Entry(root)
-        timewindow.grid(row = 0, column = 3)
+        timewindow.grid(row = a, column = 8)
 
         OKbutton = Button(root,text="OK", command=GUIinit)
-        OKbutton.grid(row = 1, columnspan = 4,sticky = "nsew")
+        OKbutton.grid(row = a+1, columnspan = 11,sticky = "nsew")
 
         root.mainloop()
 else:

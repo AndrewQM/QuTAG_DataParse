@@ -35,21 +35,23 @@ class Mask:
         self.chB = channelB
         self.window = window
         self.offset = offset
-        self.accept = [0]*len(all_lines)
+        #self.accept = [0]*len(all_lines)
         if (self.window == 0) or (self.chA == 0) or (self.chB == 0):
             self.deactivated = 1
         else:
             self.deactivated = 0
 
-    def generate_mask(self):
+    def generate_mask(self, lineset):
         if self.deactivated:
             # the mask is unused, and disabled.
-            self.accept = [1]*len(all_lines)
+            #self.accept.clear()
+            self.accept = [1]*len(lineset)
         else:
-            self.accept = [0]*len(all_lines)
-            for line in range(len(all_lines)):
-                timeA = all_lines[line][self.chA-1]
-                timeB = all_lines[line][self.chB-1]
+            #self.accept.clear()
+            self.accept = [0]*len(lineset)
+            for line in range(len(lineset)):
+                timeA = lineset[line][self.chA-1]
+                timeB = lineset[line][self.chB-1]
                 if (timeA < 0) or (timeB < 0):
                     #chA or chB values are not valid (e.g. if ch value is -666). Move on to next
                     continue
@@ -85,9 +87,9 @@ def run():
     if ops.inttype:
         print("integrating by time")
         # integration by time
-        mask1.generate_mask()
-        mask2.generate_mask()
-        mask3.generate_mask()
+        mask1.generate_mask(all_lines)
+        mask2.generate_mask(all_lines)
+        mask3.generate_mask(all_lines)
         if ops.Mask12_OP or mask1.deactivated or mask1.deactivated:
             # do AND operation when specified op is AND, or when one of the masks is deactivated.
             finalmask = [mask1.accept[i] and mask2.accept[i] for i in range(len(mask1.accept))]
@@ -162,7 +164,7 @@ def run():
         print(by_files_array)
 
         with open("ParseOutput.txt", 'w') as output:
-            for entry in by_times_array:
+            for entry in by_files_array:
                 output.write(str(entry)+'\n')
 
         plt.plot(by_files_array)
@@ -172,14 +174,15 @@ def run():
 
 def Generate(filename):
 
+    all_lines = []
     with open(filename, 'r') as fobj:
 
-        all_lines = [[int(num) for num in line.split()] for line in fobj]
+        lineset = [[int(num) for num in line.split()] for line in fobj]
 
-    #print("length of file: ", len(all_lines))
+    print("length of file: ", len(lineset))
     totalt = 0
     for t in range(4):
-        totaltt = all_lines[len(all_lines)-1][t]-all_lines[0][t]
+        totaltt = lineset[len(lineset)-1][t]-lineset[0][t]
         if totaltt > totalt:
             totalt = totaltt
 
@@ -190,9 +193,9 @@ def Generate(filename):
     #Just need to re-generate masks and sum the final mask for this file
 
     print("scanning file: ", filename)
-    mask1.generate_mask()
-    mask2.generate_mask()
-    mask3.generate_mask()
+    mask1.generate_mask(lineset)
+    mask2.generate_mask(lineset)
+    mask3.generate_mask(lineset)
     if ops.Mask12_OP or mask1.deactivated or mask1.deactivated:
         # do AND operation when specified op is AND, or when one of the masks is deactivated.
         finalmask = [mask1.accept[i] and mask2.accept[i] for i in range(len(mask1.accept))]

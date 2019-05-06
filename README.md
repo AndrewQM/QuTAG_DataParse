@@ -31,7 +31,7 @@ The data file directed to `dataparse_params.txt` has a format like:
 
 *Note: the time tags shown are for illustrative purposes only and are not representative of an actual data stream. TABS have also been added to make the formal more clear.*
 
-The pseudo-data above implies the clock is on channel 1, a semi-often event is on channel 2, and a rarer even is on channel 4. Channel 3 is unused.
+The pseudo-data above implies the clock is on channel 1, a semi-often event is on channel 2, and a rarer event is on channel 4. Channel 3 is unused.
 
 With the data formatted this way, a line corresponds to a 'detection event'. `dataparse_params.txt` applies to each detection event a series of accept/reject operations or *Masks* based on specified coincidence window and offset parameters between any two channels. Masks are combined with logical AND or OR operations allowing the overall coincidence detection process involving all four channels to be quite complex.
 
@@ -80,4 +80,4 @@ This mode is intended for when FQNETDAQ is run multiple times generating multipl
     testdata_4.txt
     ...
 
-Working with files in a directory other than QuTAGDataparse is not yet supported. There is more work to be done on clarifying the form of output data from the by-time and by-files methods (e.g. specifying the bin number and corresponding time for coincidence counts generated in by-time mode). For now, the array generated with either method is saved as a file named `ParseOutput.txt` in the current directory. 
+Working with files in a directory other than QuTAGDataparse is not yet supported. There is more work to be done on clarifying the form of output data from the by-time and by-files methods (e.g. specifying the bin number and corresponding time for coincidence counts generated in by-time mode). For now, the array generated with either method is saved as a file named `ParseOutput.txt` in the current directory.

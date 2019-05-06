@@ -33,7 +33,7 @@ The data file directed to `dataparse_params.txt` has a format like:
 
 The pseudo-data above implies the clock is on channel 1, a semi-often event is on channel 2, and a rarer even is on channel 4. Channel 3 is unused.
 
-With the data formatted this way, a line corresponds to a 'detection event'. `dataparse_params.txt` applies to each detection even a series of accept/reject or operations or *Masks* based on specified coincidence window and offset between two channels. Masks are combined with logical AND or OR operations allowing the overall coincidence detection process involving all four channels to be quite complex.
+With the data formatted this way, a line corresponds to a 'detection event'. `dataparse_params.txt` applies to each detection event a series of accept/reject operations or *Masks* based on specified coincidence window and offset parameters between any two channels. Masks are combined with logical AND or OR operations allowing the overall coincidence detection process involving all four channels to be quite complex.
 
 The following shows corresponding values of 3 masks to the right of the timetag data:
 
@@ -56,10 +56,10 @@ Parameters that would generate the first mask values given the input values coul
     Offset: 0
     Window:3000000
 ```
+In this case, the 1st mask accepts a coincidence event if the clock channel and channel 2 timestamps for that event are within 3µs of each other.
+The second mask could be generated with Channel A as 2, and Channel B as 4. Notice how masks can be generated with two channels neither of which are the clock channel.
 
-That is, the mask accepts a coincidence event if the clock channel and channel 2 timestamps for that event are within 3µs of each other.
-
-The offset value is subtracted from the Channel B timestamp before checking if the timestamps of Channel A and B fall within the Window time.
+The offset value is subtracted from the Channel B timestamp before checking if the timestamps of Channel A and B fall within the window time.
 
 If the Channel A, Channel B, or Window parameters of a mask are left blank, the mask is deactivated and does not infuence the final calculation.
 
@@ -67,10 +67,12 @@ If the Channel A, Channel B, or Window parameters of a mask are left blank, the 
 ****************************************
 
 ### by time
-This mode is intended to be used when data is collected over some period during which a degree of freedom of the experimental apparatus changes smoothly. For example, the optical delay line could be scanning though it's full range. Say, for example, data is continuously collected with FQNETDAQ for 1 minute. The Integration Bins paramter specifies how many chunks of time will be integrated over to generate coincidence data points. If the Integration Bins value is 60, then the number of events matching the coincidnece criteria in 1-second intervals will be added together to generate data points.
+This mode is intended to be used when data is collected over some period during which a degree of freedom of the experimental apparatus changes smoothly. For example, the optical delay line could be scanning though it's full range as FQNETDAQ collects data.
+
+For example, say data is continuously collected with FQNETDAQ for 1 minute. The Integration Bins parameter specifies how many chunks of time will be integrated over to generate coincidence data points. If the Integration Bins value is 60, then the number of events matching the coincidnece criteria in 1-second intervals will be added together to generate coincidence sum data points.
 
 ### by files
-This mode is intended for when FQNETDAQ is run multipe times generating multiple files, each time while the experimental apparatus is static (no degrees of freedom like polarization or time delay are being actively changed). Data files should be numbered so that they end with an underscore followed by a file number. For example, the following files could be automatically found in the current directory and processed by QuTAGDataparse if the first argument passed to the program during execution was "testdata_1.txt".
+This mode is intended for when FQNETDAQ is run multiple times generating multiple files, each time while the experimental apparatus is static (no degrees of freedom like polarization or time delay are being actively changed). Data files should be numbered so that they end with an underscore followed by a file number. For example, the following files could be automatically found in the current directory and processed by QuTAGDataparse if the first argument passed to the program during execution was "testdata_1.txt".
 
     testdata_1.txt
     testdata_2.txt

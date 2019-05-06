@@ -210,6 +210,7 @@ def GUIinit():
     ops.intbins = int(bins_val)
 
 
+
     print(OP12Val.get())
     print(OP23Val.get())
     if OP12Val.get() == 'AND':

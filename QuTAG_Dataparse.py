@@ -3,6 +3,8 @@ from tkinter.ttk import *
 from matplotlib import pyplot as plt
 import sys
 from ParamsParse import *
+import tkinter.ttk
+import matplotlib.pyplot as plt
 
 numbers=[]
 testsite_array = []
@@ -43,11 +45,12 @@ class Mask:
             # the mask is unused, and disabled.
             self.accept = [1]*len(all_lines)
         else:
+            self.accept = [0]*len(all_lines)
             for line in range(len(all_lines)):
                 timeA = all_lines[line][self.chA-1]
                 timeB = all_lines[line][self.chB-1]
                 if (timeA < 0) or (timeB < 0):
-                    #no coincidence found in event. Move on to next
+                    #chA or chB values are not valid (e.g. if ch value is -666). Move on to next
                     continue
 
                 #correct for offset
@@ -60,6 +63,12 @@ class Mask:
             #window = timewindow(all_lines[line][0], totalt, all_lines[0][0])
             #print("window:", window)
             #array goes from 0 to 3, channels go from 1 to 4
+    def update(self):
+        if (self.window == 0) or (self.chA == 0) or (self.chB == 0):
+            self.deactivated = 1
+        else:
+            self.deactivated = 0
+
 
 
 class Operations:
@@ -70,11 +79,7 @@ class Operations:
         self.intbins = intbins
 
 def run():
-    # this is where the magic happens
-    print(mask1.chA)
-    print(mask1.chB)
-    print(mask1.window)
-    print(mask1.offset)
+    # where masks are generated and finally combined together.
 
     if ops.inttype:
         print("integrating by time")
@@ -91,6 +96,8 @@ def run():
             print("ORing 1 and 2")
 
         if ops.Mask23_OP or mask3.deactivated:
+            print("mask 23 op is ", ops.Mask23_OP)
+            print("mask3 deactivated is", mask3.deactivated)
             finalmask = [finalmask[i] and mask3.accept[i] for i in range(len(mask1.accept))]
             print("ANDing 12 and 3")
         elif ops.Mask23_OP == 0:
@@ -123,6 +130,7 @@ def run():
 
 
     else:
+        print("integrating by files")
         # integration by files
         # first file already loaded
         mask1.generate_mask()
@@ -161,13 +169,70 @@ def run():
 
 def GUIinit():
     #this is where you declare and fill the Mask1, Mask2, Mask3 and ops objects.
-    window_val = timewindow.get()
+    bins_val = timebins.get()
+    #thingy = Mask1ChAVal.get()
+    #print("this is Mask 1 ChA Val", thingy)
 
-    ops.intbins = int(window_val)
+    #mask1 = Mask(int(Mask1ChAVal.get()),int(Mask1ChBVal.get()),int(Mask1WindowVal.get()),int(Mask1offsetVal.get()))       #channelA, channelB, window, offset):
+    #mask2 = Mask(int(Mask2ChAVal.get()),int(Mask2ChBVal.get()),int(Mask2WindowVal.get()),int(Mask2offsetVal.get()))
+    #mask3 = Mask(int(Mask3ChAVal.get()),int(Mask3ChBVal.get()),int(Mask3WindowVal.get()),int(Mask3offsetVal.get()))
+    if (Mask1ChAVal.get() != ''): mask1.chA = int(Mask1ChAVal.get())
+    if (Mask1ChBVal.get() != ''): mask1.chB = int(Mask1ChBVal.get())
+    if (Mask1WindowVal.get() != ''): mask1.window = int(Mask1WindowVal.get())
+    if (Mask1offsetVal.get() != ''): mask1.offset = int(Mask1offsetVal.get())
 
-    print(mask1.chA)
-    print(mask1.chB)
-    print(mask1.window)
+
+    if (Mask2ChAVal.get() != ''): mask2.chA = int(Mask2ChAVal.get())
+    if (Mask2ChBVal.get() != ''): mask2.chB = int(Mask2ChBVal.get())
+    if (Mask2WindowVal.get() != ''): mask2.window = int(Mask2WindowVal.get())
+    if (Mask2offsetVal.get() != ''): mask2.offset = int(Mask2offsetVal.get())
+
+    if (Mask3ChAVal.get() != ''): mask3.chA = int(Mask3ChAVal.get())
+    if (Mask3ChBVal.get() != ''): mask3.chB = int(Mask3ChBVal.get())
+    if (Mask3WindowVal.get() != ''): mask3.window = int(Mask3WindowVal.get())
+    if (Mask3offsetVal.get() != ''): mask3.offset = int(Mask3offsetVal.get())
+
+
+    mask1.update()
+    mask2.update()
+    mask3.update()
+
+    print("mask1 deactivated is: ", mask1.deactivated)
+    print("mask2 deactivated is: ", mask2.deactivated)
+    print("mask3 deactivated is: ", mask3.deactivated)
+
+    if bins_val == '' and ops.inttype == 1:
+        style = Style()
+        style.configure("BW.TLabel", foreground="red")
+        timebinslabel = Label(root, text="    Integration Bins", style = "BW.TLabel")
+        return
+
+    ops.intbins = int(bins_val)
+
+
+    print(OP12Val.get())
+    print(OP23Val.get())
+    if OP12Val.get() == 'AND':
+        ops.Mask12_OP = 1
+    elif OP12Val.get() == ' OR ':
+        ops.Mask23_OP = 0
+    else:
+        print("Mask 1-2 Operation Error")
+        return
+
+    if OP23Val.get() == 'AND':
+        ops.Mask23_OP = 1
+    elif OP23Val.get() == ' OR ':
+        ops.Mask23_OP = 0
+    else:
+        print("Mask 2-3 Operation Error")
+        return
+
+
+
+    #print(mask1.chA)
+    #print(mask1.chB)
+    #print(mask1.window)
 
     if ops.inttype:
         print("using by time")
@@ -186,23 +251,24 @@ def click1():
 
         ops.inttype = 1
         check2.config(state=DISABLED)
-        timewindow.config(state=NORMAL)
-        timewindowlabel.config(state=NORMAL)
+        timebins.config(state=NORMAL)
+        timebinslabel.config(state=NORMAL)
+        #print(type(checkstat1.get()))
     else:
         check2.config(state=NORMAL)
-        bytime = 0
+        ops.inttype = 0
 
 
 def click2():
     if checkstat2.get():
         #by files selected
         ops.inttype = 0
-        timewindow.config(state=DISABLED)
-        timewindowlabel.config(state=DISABLED)
+        timebins.config(state=DISABLED)
+        timebinslabel.config(state=DISABLED)
         check1.config(state=DISABLED)
     else:
         check1.config(state=NORMAL)
-        byfiles = 0
+        ops.inttype = 1
 
 
 
@@ -214,29 +280,15 @@ if len(sys.argv) > 2:
         checkstat1 = BooleanVar(root)
         checkstat2 = BooleanVar(root)
 
-        Mask1CHA = 1
-        Mask1CHB = 2
-        Mask1window = 20
-        Mask1offset = 2254700
 
-        Mask2CHA = 0
-        Mask2CHB = 0
-        Mask2window = 0
-        Mask2offset = 0
+        ops = Operations(0, 0, 0, 0) #( Mask12_OP, Mask23_OP, inttype, intbins):
 
-        Mask3CHA = 0
-        Mask3CHB = 0
-        Mask3window = 0
-        Mask3offset = 0
+        #default mask values initialize them to deactivated
+        mask1 = Mask(-1,-1,0,0)
+        mask2 = Mask(-1,-1,0,0)
+        mask3 = Mask(-1,-1,0,0)
 
-
-
-        mask1 = Mask(Mask1CHA,Mask1CHB,Mask1window,Mask1offset)
-        mask2 = Mask(Mask2CHA,Mask2CHB,Mask2window,Mask2offset)
-        mask3 = Mask(Mask3CHA,Mask3CHB,Mask3window,Mask3offset)
-
-        ops = Operations(1, 1, 0, 0)
-
+        timebinslabel = Label(root, text="    Integration Bins", style = "BW.TLabel")
         x = 2
         y = x + 1
         z = y + 1
@@ -253,44 +305,75 @@ if len(sys.argv) > 2:
         space3 = Label(root, text=" ").grid(row = 1, column = 0)
 
         root.title('QuTAG DataParse')
-        Mask1Label = Label(root, text="Mask1:   ").grid(row = x, column = 0)
-        Mask1ChA = Label(root, text="    Channel A:").grid(row = x, column = 1)
-        Mask1ChAVal = Entry(root).grid(row = x, column = 2)
-        Mask1offset = Label(root, text="    Offset (ps):").grid(row = x, column = 3)
-        Mask1offsetVal = Entry(root).grid(row = x, column = 4)
-        Mask1ChB = Label(root, text="    Channel B:").grid(row = x, column = 5)
-        Mask1ChBVal = Entry(root).grid(row = x, column = 6)
-        Mask1Window = Label(root, text="    Window (ps)").grid(row = x, column = 7)
-        Mask1WindowVal = Entry(root).grid(row = x, column = 8)
-        OP12Label = Label(root, text="      1-2 OP:").grid(row = x, column = 9)
+        Mask1Label = Label(root, text="Mask1:   ")
+        Mask1Label.grid(row = x, column = 0)
+        Mask1ChA = Label(root, text="    Channel A:")
+        Mask1ChA.grid(row = x, column = 1)
+        Mask1ChAVal = Entry(root)
+        Mask1ChAVal.grid(row = x, column = 2)
+        Mask1offset = Label(root, text="    Offset (ps):")
+        Mask1offset.grid(row = x, column = 3)
+        Mask1offsetVal = Entry(root)
+        Mask1offsetVal.grid(row = x, column = 4)
+        Mask1ChB = Label(root, text="    Channel B:")
+        Mask1ChB.grid(row = x, column = 5)
+        Mask1ChBVal = Entry(root)
+        Mask1ChBVal.grid(row = x, column = 6)
+        Mask1Window = Label(root, text="    Window (ps)")
+        Mask1Window.grid(row = x, column = 7)
+        Mask1WindowVal = Entry(root)
+        Mask1WindowVal.grid(row = x, column = 8)
+        OP12Label = Label(root, text="      1-2 OP:")
+        OP12Label.grid(row = x, column = 9)
         OP12Val = StringVar(root)
         OP12Val.set(OPTIONS[0]) # default value
-        OP12 = OptionMenu(root, OP12Val, *OPTIONS).grid(row = x, column = 10)
+        OP12 = OptionMenu(root, OP12Val, *OPTIONS)
+        OP12.grid(row = x, column = 10)
 
 
-        Mask2Label = Label(root, text="Mask2:   ").grid(row = y, column = 0)
-        Mask2ChA = Label(root, text="    Channel A:").grid(row = y, column = 1)
-        Mask2ChAVal = Entry(root).grid(row = y, column = 2)
-        Mask2offset = Label(root, text="    Offset (ps):").grid(row = y, column = 3)
-        Mask2offsetVal = Entry(root).grid(row = y, column = 4)
-        Mask2ChB = Label(root, text="    Channel B:").grid(row = y, column = 5)
-        Mask2ChBVal = Entry(root).grid(row = y, column = 6)
-        Mask2Window = Label(root, text="    Window (ps)").grid(row = y, column = 7)
-        Mask2WindowVal = Entry(root).grid(row = y, column = 8)
-        OP12Label = Label(root, text="      2-3 OP:").grid(row = y, column = 9)
+        Mask2Label = Label(root, text="Mask2:   ")
+        Mask2Label.grid(row = y, column = 0)
+        Mask2ChA = Label(root, text="    Channel A:")
+        Mask2ChA.grid(row = y, column = 1)
+        Mask2ChAVal = Entry(root)
+        Mask2ChAVal.grid(row = y, column = 2)
+        Mask2offset = Label(root, text="    Offset (ps):")
+        Mask2offset.grid(row = y, column = 3)
+        Mask2offsetVal = Entry(root)
+        Mask2offsetVal.grid(row = y, column = 4)
+        Mask2ChB = Label(root, text="    Channel B:")
+        Mask2ChB.grid(row = y, column = 5)
+        Mask2ChBVal = Entry(root)
+        Mask2ChBVal.grid(row = y, column = 6)
+        Mask2Window = Label(root, text="    Window (ps)")
+        Mask2Window.grid(row = y, column = 7)
+        Mask2WindowVal = Entry(root)
+        Mask2WindowVal.grid(row = y, column = 8)
+        OP12Label = Label(root, text="      2-3 OP:")
+        OP12Label.grid(row = y, column = 9)
         OP23Val = StringVar(root)
         OP23Val.set(OPTIONS[0]) # default value
-        OP23 = OptionMenu(root, OP23Val, *OPTIONS).grid(row = y, column = 10)
+        OP23 = OptionMenu(root, OP23Val, *OPTIONS)
+        OP23.grid(row = y, column = 10)
 
-        Mask3Label = Label(root, text="Mask2:   ").grid(row = z, column = 0)
-        Mask3ChA = Label(root, text="    Channel A:").grid(row = z, column = 1)
-        Mask3ChAVal = Entry(root).grid(row = z, column = 2)
-        Mask3offset = Label(root, text="    Offset (ps):").grid(row = z, column = 3)
-        Mask3offsetVal = Entry(root).grid(row = z, column = 4)
-        Mask3ChB = Label(root, text="    Channel B:").grid(row = z, column = 5)
-        Mask3ChBVal = Entry(root).grid(row = z, column = 6)
-        Mask3Window = Label(root, text="    Window (ps)").grid(row = z, column = 7)
-        Mask3WindowVal = Entry(root).grid(row = z, column = 8)
+        Mask3Label = Label(root, text="Mask3:   ")
+        Mask3Label.grid(row = z, column = 0)
+        Mask3ChA = Label(root, text="    Channel A:")
+        Mask3ChA.grid(row = z, column = 1)
+        Mask3ChAVal = Entry(root)
+        Mask3ChAVal.grid(row = z, column = 2)
+        Mask3offset = Label(root, text="    Offset (ps):")
+        Mask3offset.grid(row = z, column = 3)
+        Mask3offsetVal = Entry(root)
+        Mask3offsetVal.grid(row = z, column = 4)
+        Mask3ChB = Label(root, text="    Channel B:")
+        Mask3ChB.grid(row = z, column = 5)
+        Mask3ChBVal = Entry(root)
+        Mask3ChBVal.grid(row = z, column = 6)
+        Mask3Window = Label(root, text="    Window (ps)")
+        Mask3Window.grid(row = z, column = 7)
+        Mask3WindowVal = Entry(root)
+        Mask3WindowVal.grid(row = z, column = 8)
 
 
 
@@ -305,10 +388,10 @@ if len(sys.argv) > 2:
         check2 = Checkbutton(text="by files", variable = checkstat2, command=click2)
         check2.grid(row = a, column = 1)
 
-        timewindowlabel = Label(root, text="    Integration Bins")
-        timewindowlabel.grid(row = a, column = 7)
-        timewindow = Entry(root)
-        timewindow.grid(row = a, column = 8)
+
+        timebinslabel.grid(row = a, column = 7)
+        timebins = Entry(root)
+        timebins.grid(row = a, column = 8)
 
         OKbutton = Button(root,text="OK", command=GUIinit)
         OKbutton.grid(row = a+1, columnspan = 11,sticky = "nsew")

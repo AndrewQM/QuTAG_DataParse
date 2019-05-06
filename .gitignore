@@ -5,7 +5,11 @@
 
 data.txt
 data_test2.txt
-
+data_test_1.txt
+data_test_2.txt
+data_test_3.txt
+data_test_27.txt
+dalt_d.txt
 
 
 # Test code files
@@ -17,6 +21,7 @@ dataparse_2.py
 dataparse_3.py
 grabfile.py
 params_parser.py
+sorting_files.py
 
 FQNETDAQ.old.c
 FQNETDAQ.old2.c

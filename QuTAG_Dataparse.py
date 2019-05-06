@@ -5,6 +5,7 @@ import sys
 from ParamsParse import *
 import tkinter.ttk
 import matplotlib.pyplot as plt
+import glob #used for searching current directory for multiple data files
 
 numbers=[]
 testsite_array = []
@@ -96,8 +97,6 @@ def run():
             print("ORing 1 and 2")
 
         if ops.Mask23_OP or mask3.deactivated:
-            print("mask 23 op is ", ops.Mask23_OP)
-            print("mask3 deactivated is", mask3.deactivated)
             finalmask = [finalmask[i] and mask3.accept[i] for i in range(len(mask1.accept))]
             print("ANDing 12 and 3")
         elif ops.Mask23_OP == 0:
@@ -127,49 +126,87 @@ def run():
         print()
         print()
         print(by_times_array)
+        plt.plot(by_times_array)
+
+        plt.show()
+        return
 
 
     else:
         print("integrating by files")
-        # integration by files
-        # first file already loaded
-        mask1.generate_mask()
-        mask2.generate_mask()
-        mask3.generate_mask()
-        if ops.Mask12_OP or mask1.deactivated or mask1.deactivated:
-            # do AND operation when specified op is AND, or when one of the masks is deactivated.
-            finalmask = [mask1.accept[i] and mask2.accept[i] for i in range(len(mask1.accept))]
-            print("ANDing 1 and 2")
-        elif ops.Mask12_OP == 0:
-            finalmask = [mask1.accept[i] or mask2.accept[i] for i in range(len(mask1.accept))]
-            print("ORing 1 and 2")
 
-        if ops.Mask23_OP or mask3.deactivated:
-            finalmask = [finalmask[i] and mask3.accept[i] for i in range(len(mask1.accept))]
-            print("ANDing 12 and 3")
-        elif ops.Mask23_OP == 0:
-            finalmask = [finalmask[i] or mask3.accept[i] for i in range(len(mask1.accept))]
-            print("ORing 12 and 3")
+        files = glob.glob("data_test*")
+        print(files)
 
+        firstfile = datafile1.split('_')
+        basename = '_'.join(firstfile[0:-1]) + '_'
 
+        #sort files based on the value of their numbered suffix (e.g. ****_1.txt)
+        sortedfiles = sorted(files, key=lambda name:int(name[len(basename):-4]))
+        by_files_array = [0]*len(files)
 
+        print("scanning ", len(sortedfiles), " files.")
 
-        by_files_array = []
-        by_files_array.append(sum(finalmask))
+        for i in range(len(sortedfiles)):
+            by_files_array[i] = Generate(sortedfiles[i])
 
-        print("not finished")
-        exit()
-        #now loop though the other files
-        # for i in range(extrafiles):
+        print(by_files_array)
+        plt.plot(by_files_array)
+        plt.show()
+        return
 
 
+def Generate(filename):
+
+    with open(filename, 'r') as fobj:
+
+        all_lines = [[int(num) for num in line.split()] for line in fobj]
+
+    #print("length of file: ", len(all_lines))
+    totalt = 0
+    for t in range(4):
+        totaltt = all_lines[len(all_lines)-1][t]-all_lines[0][t]
+        if totaltt > totalt:
+            totalt = totaltt
+
+    #can I reload something the object references that was originally a global array?
 
 
+    #the mask objects should still have all the coincidence parameters.
+    #Just need to re-generate masks and sum the final mask for this file
+
+    print("scanning file: ", filename)
+    mask1.generate_mask()
+    mask2.generate_mask()
+    mask3.generate_mask()
+    if ops.Mask12_OP or mask1.deactivated or mask1.deactivated:
+        # do AND operation when specified op is AND, or when one of the masks is deactivated.
+        finalmask = [mask1.accept[i] and mask2.accept[i] for i in range(len(mask1.accept))]
+        #print("ANDing 1 and 2")
+    elif ops.Mask12_OP == 0:
+        finalmask = [mask1.accept[i] or mask2.accept[i] for i in range(len(mask1.accept))]
+        #print("ORing 1 and 2")
+
+    if ops.Mask23_OP or mask3.deactivated:
+        finalmask = [finalmask[i] and mask3.accept[i] for i in range(len(mask1.accept))]
+        #print("ANDing 12 and 3")
+    elif ops.Mask23_OP == 0:
+        finalmask = [finalmask[i] or mask3.accept[i] for i in range(len(mask1.accept))]
+        #print("ORing 12 and 3")
+
+    return sum(finalmask)
 
 
 def GUIinit():
     #this is where you declare and fill the Mask1, Mask2, Mask3 and ops objects.
     bins_val = timebins.get()
+    if bins_val != '': ops.intbins = int(bins_val)
+
+    if bins_val == '' and ops.inttype == 1:
+        style = Style()
+        style.configure("BW.TLabel", foreground="red")
+        timebinslabel = Label(root, text="    Integration Bins", style = "BW.TLabel")
+        return
     #thingy = Mask1ChAVal.get()
     #print("this is Mask 1 ChA Val", thingy)
 
@@ -201,19 +238,8 @@ def GUIinit():
     print("mask2 deactivated is: ", mask2.deactivated)
     print("mask3 deactivated is: ", mask3.deactivated)
 
-    if bins_val == '' and ops.inttype == 1:
-        style = Style()
-        style.configure("BW.TLabel", foreground="red")
-        timebinslabel = Label(root, text="    Integration Bins", style = "BW.TLabel")
-        return
 
-    ops.intbins = int(bins_val)
-
-
-
-    print(OP12Val.get())
-    print(OP23Val.get())
-    if OP12Val.get() == 'AND':
+    if (OP12Val.get() == 'AND') or (OP12Val.get() == '    '):
         ops.Mask12_OP = 1
     elif OP12Val.get() == ' OR ':
         ops.Mask23_OP = 0
@@ -221,7 +247,7 @@ def GUIinit():
         print("Mask 1-2 Operation Error")
         return
 
-    if OP23Val.get() == 'AND':
+    if (OP23Val.get() == 'AND') or (OP23Val.get() == '    '):  #if unspecified, operation default is AND
         ops.Mask23_OP = 1
     elif OP23Val.get() == ' OR ':
         ops.Mask23_OP = 0
@@ -229,18 +255,9 @@ def GUIinit():
         print("Mask 2-3 Operation Error")
         return
 
+    run() #all objects have parameters loaded, continue with calculation.
 
-
-    #print(mask1.chA)
-    #print(mask1.chB)
-    #print(mask1.window)
-
-    if ops.inttype:
-        print("using by time")
-
-    #mask1.generate_mask()
-    print(mask1.accept[1:30])
-    run()
+    return
 
 
 
@@ -290,6 +307,7 @@ if len(sys.argv) > 2:
         mask3 = Mask(-1,-1,0,0)
 
         timebinslabel = Label(root, text="    Integration Bins", style = "BW.TLabel")
+
         x = 2
         y = x + 1
         z = y + 1

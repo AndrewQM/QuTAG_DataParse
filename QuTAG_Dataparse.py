@@ -126,9 +126,18 @@ def run():
         print()
         print()
         print(by_times_array)
+
+        with open("ParseOutput.txt", 'w') as output:
+            for entry in by_times_array:
+                output.write(str(entry)+'\n')
+
         plt.plot(by_times_array)
 
         plt.show()
+
+
+
+
         return
 
 
@@ -151,6 +160,11 @@ def run():
             by_files_array[i] = Generate(sortedfiles[i])
 
         print(by_files_array)
+
+        with open("ParseOutput.txt", 'w') as output:
+            for entry in by_times_array:
+                output.write(str(entry)+'\n')
+
         plt.plot(by_files_array)
         plt.show()
         return

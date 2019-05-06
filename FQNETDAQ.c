@@ -105,10 +105,10 @@ static void run( int selftest, int flatgen, int normgen,
     checkRc( "TDC_setExposureTime", rc );
     rc = TDC_setCoincidenceWindow(  COINC_WINDOW ); /* units in ps */
     checkRc( "TDC_setCoincidenceWindow", rc );
-    rc = TDC_configureSignalConditioning(1, SCOND_MISC, 1, .1);
-    rc = TDC_configureSignalConditioning(2, SCOND_MISC, 1, .1);
-    rc = TDC_configureSignalConditioning(3, SCOND_MISC, 1, .1);
-    rc = TDC_configureSignalConditioning(4, SCOND_MISC, 1, .1);
+    rc = TDC_configureSignalConditioning(1, SCOND_MISC, 1, .35);
+    rc = TDC_configureSignalConditioning(2, SCOND_MISC, 1, .35);
+    rc = TDC_configureSignalConditioning(3, SCOND_MISC, 1, .35);
+    rc = TDC_configureSignalConditioning(4, SCOND_MISC, 1, .35);
     checkRc( "TDC_configureSignalConditioning", rc );
 
     if ( selftest ) {

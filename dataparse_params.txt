@@ -1,4 +1,4 @@
-Integration type: bytime
+Integration type: byfiles
 Integration bins: 50
 
 
@@ -11,15 +11,15 @@ Mask1
 Mask1-2 operation: AND
 
 Mask2
-     channelA: 0
-     channelB: 0
-     window(ps): 0
-     offset(ps): 0
+     channelA: 1
+     channelB: 3
+     window(ps): 4
+     offset(ps): 2254700
 
 Mask2-3 operation: AND
 
 Mask3
-     channelA: 0
-     channelB: 0
-     window(ps): 0
-     offset(ps): 0
+     channelA: 1
+     channelB: 4
+     window(ps): 10
+     offset(ps): 2254700

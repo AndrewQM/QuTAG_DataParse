@@ -15,13 +15,13 @@ testsite_array = []
 datafile1 = sys.argv[1]
 
 with open(datafile1, 'r') as fobj:
-
-    all_lines = [[int(num) for num in line.split()] for line in fobj]
+    next(fobj) #ignore line with labels
+    all_lines = [[int(num) for num in line.split()] for line in fobj]  #ignore first line of file
 
 print("length of file: ", len(all_lines))
 totalt = 0
 for t in range(4):
-    totaltt = all_lines[len(all_lines)-1][t]-all_lines[0][t]
+    totaltt = abs(all_lines[len(all_lines)-1][t]) - abs(all_lines[0][t])
     if totaltt > totalt:
         totalt = totaltt
 print("total time of file: ", int(totalt/1000000000), "ms")
@@ -71,6 +71,20 @@ class Mask:
             self.deactivated = 1
         else:
             self.deactivated = 0
+
+class Output:
+    def __init__(self):
+        self.ch1 = 0
+        self.ch2 = 0
+        self.ch3 = 0
+        self.ch4 = 0
+        self.accept1 = 0
+        self.accept2 = 0
+        self.accept3 = 0
+        self.accept12 = 0
+        self.accept23 = 0
+        self.accept13 = 0
+        self.accept123 = 0
 
 
 
@@ -145,7 +159,6 @@ def run():
 
     else:
         print("integrating by files")
-
         files = glob.glob("data_test*")
         print(files)
 
@@ -158,60 +171,156 @@ def run():
 
         print("scanning ", len(sortedfiles), " files.")
 
-        for i in range(len(sortedfiles)):
-            by_files_array[i] = Generate(sortedfiles[i])
+        #for i in range(len(sortedfiles)):
+        #    by_files_array[i] = Generate(sortedfiles[i])
 
         print(by_files_array)
 
-        with open("ParseOutput.txt", 'w') as output:
-            for entry in by_files_array:
-                output.write(str(entry)+'\n')
+        #with open("ParseOutput.txt", 'w') as output:
+        #    for entry in by_files_array:
+        #        output.write(str(entry)+'\n')
+
+
+
+        with open("ParseOutput.csv", 'w') as output:
+            output.write(',ch1,ch2,ch3,ch4,,,,mask1,mask2,mask3,mask12,mask23,mask13,mask123\n')
+            output.write(',,,,,,,windows:,'+str(mask1.window)+','+str(mask2.window)+','+str(mask3.window)+'\n')
+            output.write(',,,,,,,offsets:,'+str(mask1.offset)+','+str(mask2.offset)+','+str(mask3.offset)+'\n')
+            output.write(',,,,,,,channels:,'+str(mask1.chA)+str(mask1.chB)+',')
+            output.write(str(mask2.chA)+str(mask2.chB)+',')
+            output.write(str(mask3.chA)+str(mask3.chB)+',')
+
+            extra12 = 0
+            if (mask2.chA != mask1.chA) and (mask2.chA != mask1.chB):
+                extra12 = mask2.chA
+            if (mask2.chB != mask1.chA) and (mask2.chB != mask1.chB):
+                extra12 = mask2.chB
+            output.write(str(mask1.chA)+str(mask1.chB)+str(extra12)+',')
+
+            extra23 = 0
+            if (mask3.chA != mask2.chA) and (mask3.chA != mask2.chB):
+                extra23 = mask3.chA
+            if (mask3.chB != mask2.chA) and (mask3.chB != mask2.chB):
+                extra23 = mask3.chB
+            output.write(str(mask2.chA)+str(mask2.chB)+str(extra23)+',')
+
+            extra13 = 0
+            if (mask3.chA != mask1.chA) and (mask3.chA != mask1.chB):
+                extra13 = mask3.chA
+            if (mask3.chB != mask1.chA) and (mask3.chB != mask1.chB):
+                extra13 = mask3.chB
+            output.write(str(mask1.chA)+str(mask1.chB)+str(extra13)+',')
+
+            extra123 = 0
+            if (mask3.chA != mask1.chA) and (mask3.chA != mask1.chB) and (mask3.chA != extra12):
+                extra123 = mask3.chA
+            if (mask3.chB != mask1.chA) and (mask3.chB != mask1.chB) and (mask3.chB != extra12):
+                extra123 = mask3.chB
+            output.write(str(mask1.chA)+str(mask1.chB)+str(extra12)+str(extra123)+'\n')
+
+            output.write('\n')
+
+
+            for i in range(len(sortedfiles)):
+                Generate(sortedfiles[i])
+                output.write(','+str(out.ch1)+','+str(out.ch2)+','+str(out.ch3)+','+str(out.ch4)+',,,,')
+                output.write(str(out.accept1)+','+str(out.accept2)+','+str(out.accept3)+','+str(out.accept12)+','+str(out.accept23)+','+str(out.accept13)+','+str(out.accept123))
+                output.write('\n')
+
+
 
         plt.plot(by_files_array)
+        plt.ylabel("Coincidences per ms")
         plt.show()
         return
 
 
 def Generate(filename):
 
-    all_lines = []
+    lineset = []
     with open(filename, 'r') as fobj:
 
         lineset = [[int(num) for num in line.split()] for line in fobj]
 
-    print("length of file: ", len(lineset))
+    #print("length of file: ", len(lineset))
     totalt = 0
     for t in range(4):
-        totaltt = lineset[len(lineset)-1][t]-lineset[0][t]
+        totaltt = abs(lineset[len(lineset)-1][t]) - abs(lineset[0][t])
         if totaltt > totalt:
             totalt = totaltt
 
-    #can I reload something the object references that was originally a global array?
+    ch1 = 0
+    ch2 = 0
+    ch3 = 0
+    ch4 = 0
+    for i in range(len(lineset)):
+        if lineset[i][0] > 0:
+            ch1 = ch1 + 1
+        if lineset[i][1] > 0:
+            ch2 = ch2 + 1
+        if lineset[i][2] > 0:
+            ch3 = ch3 + 1
+        if lineset[i][3] > 0:
+            ch4 = ch4 + 1
 
-
+    out.ch1 = ch1
+    out.ch2 = ch2
+    out.ch3 = ch3
+    out.ch4 = ch4
     #the mask objects should still have all the coincidence parameters.
     #Just need to re-generate masks and sum the final mask for this file
 
     print("scanning file: ", filename)
+    print("total time of file: ", int(totalt/1000000000), "ms")
     mask1.generate_mask(lineset)
     mask2.generate_mask(lineset)
     mask3.generate_mask(lineset)
-    if ops.Mask12_OP or mask1.deactivated or mask1.deactivated:
-        # do AND operation when specified op is AND, or when one of the masks is deactivated.
-        finalmask = [mask1.accept[i] and mask2.accept[i] for i in range(len(mask1.accept))]
-        #print("ANDing 1 and 2")
-    elif ops.Mask12_OP == 0:
-        finalmask = [mask1.accept[i] or mask2.accept[i] for i in range(len(mask1.accept))]
-        #print("ORing 1 and 2")
 
-    if ops.Mask23_OP or mask3.deactivated:
-        finalmask = [finalmask[i] and mask3.accept[i] for i in range(len(mask1.accept))]
-        #print("ANDing 12 and 3")
-    elif ops.Mask23_OP == 0:
-        finalmask = [finalmask[i] or mask3.accept[i] for i in range(len(mask1.accept))]
+    if mask1.deactivated:
+        out.accept1 = 0
+    else:
+        out.accept1 = sum(mask1.accept)
+
+    if mask2.deactivated:
+        out.accept2 = 0
+    else:
+        out.accept2 = sum(mask2.accept)
+
+    if mask3.deactivated:
+        out.accept3 = 0
+    else:
+        out.accept3 = sum(mask3.accept)
+
+
+    #if ops.Mask12_OP or mask1.deactivated or mask2.deactivated:
+    #    # do AND operation when specified op is AND, or when one of the masks is deactivated.
+    #    mask12 = [mask1.accept[i] and mask2.accept[i] for i in range(len(mask1.accept))]
+    #    #print("ANDing 1 and 2")
+    #elif ops.Mask12_OP == 0:
+    #    mask12 = [mask1.accept[i] or mask2.accept[i] for i in range(len(mask1.accept))]
+    #    #print("ORing 1 and 2")
+    mask12 = [mask1.accept[i] and mask2.accept[i] for i in range(len(mask1.accept))]
+    out.accept12 = sum(mask12)
+
+    mask13 = [mask1.accept[i] and mask3.accept[i] for i in range(len(mask1.accept))]
+    out.accept13 = sum(mask13)
+
+    mask23 = [mask2.accept[i] and mask3.accept[i] for i in range(len(mask2.accept))]
+    out.accept23 = sum(mask13)
+
+    mask123 = [mask12[i] and mask3.accept[i] for i in range(len(mask3.accept))]
+    out.accept123 = sum(mask123)
+
+
+
+    #if ops.Mask23_OP or mask3.deactivated:
+    #    finalmask = [finalmask[i] and mask3.accept[i] for i in range(len(mask1.accept))]
+    #    #print("ANDing 12 and 3")
+    #elif ops.Mask23_OP == 0:
+    #    finalmask = [finalmask[i] or mask3.accept[i] for i in range(len(mask1.accept))]
         #print("ORing 12 and 3")
 
-    return sum(finalmask)
+    #return sum(finalmask)/(totalt/1000000000)       #normalize the coincidence sum with the time elapsed
 
 
 def GUIinit():
@@ -319,6 +428,7 @@ if len(sys.argv) > 2:
         ops = Operations(0, 0, 0, 0) #( Mask12_OP, Mask23_OP, inttype, intbins):
 
         #default mask values initialize them to deactivated
+        out = Output()
         mask1 = Mask(-1,-1,0,0)
         mask2 = Mask(-1,-1,0,0)
         mask3 = Mask(-1,-1,0,0)
@@ -443,5 +553,6 @@ else:
     mask1 = Mask(Params.Mask1ChA,Params.Mask1ChB,Params.Mask1window,Params.Mask1offset)
     mask2 = Mask(Params.Mask2ChA,Params.Mask2ChB,Params.Mask2window,Params.Mask2offset)
     mask3 = Mask(Params.Mask3ChA,Params.Mask3ChB,Params.Mask3window,Params.Mask3offset)
+    out = Output()
     #print("Mask1ChA is:", Params.Mask1ChB)
     run()
